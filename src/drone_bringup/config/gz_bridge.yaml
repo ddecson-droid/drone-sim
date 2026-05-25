@@ -1,0 +1,58 @@
+# =============================================================================
+# ros_gz_bridge topic mapping configuration
+# Bridges Gazebo Harmonic (gz-transport) topics to ROS 2 topics.
+#
+# Run "gz topic -l" to discover available Gazebo topics at runtime.
+# Topic names vary based on world name and model instance suffix (e.g., x500_0).
+#
+# The launch script substitutes ${WORLD} and ${INSTANCE} at runtime.
+# =============================================================================
+
+# --- Clock synchronization (REQUIRED for use_sim_time) ---
+- ros_topic_name: "/clock"
+  gz_topic_name: "/clock"
+  ros_type_name: "rosgraph_msgs/msg/Clock"
+  gz_type_name: "gz.msgs.Clock"
+  direction: GZ_TO_ROS
+
+# --- Camera RGB image (for x500_mono_cam / x500_depth variants) ---
+- ros_topic_name: "/camera/image_raw"
+  gz_topic_name: "/world/default/model/x500_0/link/camera_link/sensor/camera_sensor/image"
+  ros_type_name: "sensor_msgs/msg/Image"
+  gz_type_name: "gz.msgs.Image"
+  direction: GZ_TO_ROS
+
+# --- Camera info ---
+- ros_topic_name: "/camera/camera_info"
+  gz_topic_name: "/world/default/model/x500_0/link/camera_link/sensor/camera_sensor/camera_info"
+  ros_type_name: "sensor_msgs/msg/CameraInfo"
+  gz_type_name: "gz.msgs.CameraInfo"
+  direction: GZ_TO_ROS
+
+# --- Lidar 2D scan (for x500_lidar_2d variant) ---
+- ros_topic_name: "/scan"
+  gz_topic_name: "/world/default/model/x500_0/link/lidar_sensor_link/sensor/lidar/scan"
+  ros_type_name: "sensor_msgs/msg/LaserScan"
+  gz_type_name: "gz.msgs.LaserScan"
+  direction: GZ_TO_ROS
+
+# --- Lidar point cloud (for GPU lidar variants) ---
+- ros_topic_name: "/lidar/points"
+  gz_topic_name: "/world/default/model/x500_0/link/lidar_link/sensor/gpu_lidar/scan/points"
+  ros_type_name: "sensor_msgs/msg/PointCloud2"
+  gz_type_name: "gz.msgs.PointCloudPacked"
+  direction: GZ_TO_ROS
+
+# --- Model pose (optional, for Gazebo-ground-truth TF) ---
+- ros_topic_name: "/gz/pose"
+  gz_topic_name: "/world/default/model/x500_0/pose"
+  ros_type_name: "geometry_msgs/msg/PoseStamped"
+  gz_type_name: "gz.msgs.Pose"
+  direction: GZ_TO_ROS
+
+# --- Actuator outputs (for debugging motor commands) ---
+- ros_topic_name: "/actuator_outputs"
+  gz_topic_name: "/world/default/model/x500_0/actuator_outputs"
+  ros_type_name: "sensor_msgs/msg/JointState"
+  gz_type_name: "gz.msgs.Actuators"
+  direction: GZ_TO_ROS

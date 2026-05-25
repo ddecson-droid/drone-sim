@@ -1,0 +1,35 @@
+# =============================================================================
+# Drone Simulation Parameters
+# =============================================================================
+
+# Simulation clock
+sim:
+  use_sim_time: true
+
+# PX4 instance configuration
+px4:
+  instance: 0
+  model_variant: "x500"       # x500, x500_mono_cam, x500_depth, x500_lidar_2d
+  world: "default"
+
+# Micro XRCE-DDS Agent
+uxrce_dds:
+  transport: "udp4"
+  port: 8888
+
+# Offboard control defaults
+offboard:
+  takeoff_height: -5.0        # NED meters (negative = up)
+  hover_time: 10.0            # seconds
+  auto_arm: true              # arm automatically after connecting
+
+# ros_gz_bridge
+gz_bridge:
+  use_sim_time: true
+  config_file: ""             # auto-filled by launch file
+  bridge_name: "ros_gz_bridge"
+
+# RViz2
+rviz:
+  use_sim_time: true
+  config_file: ""             # auto-filled by launch file

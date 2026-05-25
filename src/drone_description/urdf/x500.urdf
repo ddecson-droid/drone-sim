@@ -1,0 +1,307 @@
+<?xml version="1.0"?>
+<!--
+  X500 Quadcopter URDF model for RViz2 visualization.
+  Dimensions match the PX4 X500 SDF model (~500mm diagonal motor-to-motor).
+  Frame convention: ROS ENU (East-North-Up), matching the output of px4_tf_broadcaster.
+  base_link is at the drone IMU center.
+-->
+<robot name="x500">
+
+  <!-- ===== Materials ===== -->
+  <material name="carbon_fiber">
+    <color rgba="0.2 0.2 0.2 1.0"/>
+  </material>
+  <material name="motor_silver">
+    <color rgba="0.6 0.6 0.65 1.0"/>
+  </material>
+  <material name="prop_gray">
+    <color rgba="0.35 0.35 0.38 0.6"/>
+  </material>
+  <material name="led_red">
+    <color rgba="1.0 0.1 0.1 1.0"/>
+  </material>
+  <material name="led_blue">
+    <color rgba="0.1 0.3 1.0 1.0"/>
+  </material>
+
+  <!-- ===== base_link: drone body center (IMU origin) ===== -->
+  <link name="base_link">
+    <inertial>
+      <origin xyz="0 0 0" rpy="0 0 0"/>
+      <mass value="1.5"/>
+      <inertia ixx="0.015" ixy="0.0" ixz="0.0" iyy="0.015" iyz="0.0" izz="0.025"/>
+    </inertial>
+    <visual>
+      <origin xyz="0 0 0.02" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.23 0.23 0.04"/>
+      </geometry>
+      <material name="carbon_fiber"/>
+    </visual>
+    <collision>
+      <origin xyz="0 0 0.02" rpy="0 0 0"/>
+      <geometry>
+        <box size="0.23 0.23 0.04"/>
+      </geometry>
+    </collision>
+  </link>
+
+  <!-- ===== GPS mast atop body ===== -->
+  <link name="gps_link">
+    <visual>
+      <geometry>
+        <cylinder radius="0.01" length="0.12"/>
+      </geometry>
+      <origin xyz="0 0 0.06" rpy="0 0 0"/>
+      <material name="motor_silver"/>
+    </visual>
+  </link>
+  <joint name="gps_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="gps_link"/>
+    <origin xyz="-0.05 0 0.04" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ===== Front-left arm ===== -->
+  <link name="arm_fl">
+    <visual>
+      <origin xyz="0.08 0 0" rpy="0 0 0.7854"/>
+      <geometry>
+        <box size="0.16 0.016 0.012"/>
+      </geometry>
+      <material name="carbon_fiber"/>
+    </visual>
+  </link>
+  <joint name="arm_fl_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="arm_fl"/>
+    <origin xyz="0.06 0.06 0.0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ===== Front-right arm ===== -->
+  <link name="arm_fr">
+    <visual>
+      <origin xyz="0.08 0 0" rpy="0 0 -0.7854"/>
+      <geometry>
+        <box size="0.16 0.016 0.012"/>
+      </geometry>
+      <material name="carbon_fiber"/>
+    </visual>
+  </link>
+  <joint name="arm_fr_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="arm_fr"/>
+    <origin xyz="0.06 -0.06 0.0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ===== Rear-left arm ===== -->
+  <link name="arm_rl">
+    <visual>
+      <origin xyz="0.08 0 0" rpy="0 0 -0.7854"/>
+      <geometry>
+        <box size="0.16 0.016 0.012"/>
+      </geometry>
+      <material name="carbon_fiber"/>
+    </visual>
+  </link>
+  <joint name="arm_rl_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="arm_rl"/>
+    <origin xyz="-0.06 0.06 0.0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ===== Rear-right arm ===== -->
+  <link name="arm_rr">
+    <visual>
+      <origin xyz="0.08 0 0" rpy="0 0 0.7854"/>
+      <geometry>
+        <box size="0.16 0.016 0.012"/>
+      </geometry>
+      <material name="carbon_fiber"/>
+    </visual>
+  </link>
+  <joint name="arm_rr_joint" type="fixed">
+    <parent link="base_link"/>
+    <child link="arm_rr"/>
+    <origin xyz="-0.06 -0.06 0.0" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ===== Motor + propeller FL ===== -->
+  <link name="motor_fl">
+    <visual>
+      <geometry>
+        <cylinder radius="0.018" length="0.02"/>
+      </geometry>
+      <material name="motor_silver"/>
+    </visual>
+  </link>
+  <joint name="motor_fl_joint" type="fixed">
+    <parent link="arm_fl"/>
+    <child link="motor_fl"/>
+    <origin xyz="0.16 0 0.005" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ===== Motor + propeller FR ===== -->
+  <link name="motor_fr">
+    <visual>
+      <geometry>
+        <cylinder radius="0.018" length="0.02"/>
+      </geometry>
+      <material name="motor_silver"/>
+    </visual>
+  </link>
+  <joint name="motor_fr_joint" type="fixed">
+    <parent link="arm_fr"/>
+    <child link="motor_fr"/>
+    <origin xyz="0.16 0 0.005" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ===== Motor + propeller RL ===== -->
+  <link name="motor_rl">
+    <visual>
+      <geometry>
+        <cylinder radius="0.018" length="0.02"/>
+      </geometry>
+      <material name="motor_silver"/>
+    </visual>
+  </link>
+  <joint name="motor_rl_joint" type="fixed">
+    <parent link="arm_rl"/>
+    <child link="motor_rl"/>
+    <origin xyz="0.16 0 0.005" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ===== Motor + propeller RR ===== -->
+  <link name="motor_rr">
+    <visual>
+      <geometry>
+        <cylinder radius="0.018" length="0.02"/>
+      </geometry>
+      <material name="motor_silver"/>
+    </visual>
+  </link>
+  <joint name="motor_rr_joint" type="fixed">
+    <parent link="arm_rr"/>
+    <child link="motor_rr"/>
+    <origin xyz="0.16 0 0.005" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ===== Propeller disks (visual only) ===== -->
+  <link name="prop_fl">
+    <visual>
+      <origin xyz="0 0 0.012" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.12" length="0.002"/>
+      </geometry>
+      <material name="prop_gray"/>
+    </visual>
+  </link>
+  <joint name="prop_fl_joint" type="fixed">
+    <parent link="motor_fl"/>
+    <child link="prop_fl"/>
+    <origin xyz="0 0 0.012" rpy="0 0 0"/>
+  </joint>
+
+  <link name="prop_fr">
+    <visual>
+      <origin xyz="0 0 0.012" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.12" length="0.002"/>
+      </geometry>
+      <material name="prop_gray"/>
+    </visual>
+  </link>
+  <joint name="prop_fr_joint" type="fixed">
+    <parent link="motor_fr"/>
+    <child link="prop_fr"/>
+    <origin xyz="0 0 0.012" rpy="0 0 0"/>
+  </joint>
+
+  <link name="prop_rl">
+    <visual>
+      <origin xyz="0 0 0.012" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.12" length="0.002"/>
+      </geometry>
+      <material name="prop_gray"/>
+    </visual>
+  </link>
+  <joint name="prop_rl_joint" type="fixed">
+    <parent link="motor_rl"/>
+    <child link="prop_rl"/>
+    <origin xyz="0 0 0.012" rpy="0 0 0"/>
+  </joint>
+
+  <link name="prop_rr">
+    <visual>
+      <origin xyz="0 0 0.012" rpy="0 0 0"/>
+      <geometry>
+        <cylinder radius="0.12" length="0.002"/>
+      </geometry>
+      <material name="prop_gray"/>
+    </visual>
+  </link>
+  <joint name="prop_rr_joint" type="fixed">
+    <parent link="motor_rr"/>
+    <child link="prop_rr"/>
+    <origin xyz="0 0 0.012" rpy="0 0 0"/>
+  </joint>
+
+  <!-- ===== Landing gear (4 legs) ===== -->
+  <link name="leg_fl">
+    <visual>
+      <geometry>
+        <cylinder radius="0.006" length="0.12"/>
+      </geometry>
+      <material name="carbon_fiber"/>
+    </visual>
+  </link>
+  <joint name="leg_fl_joint" type="fixed">
+    <parent link="arm_fl"/>
+    <child link="leg_fl"/>
+    <origin xyz="0.10 0 -0.07" rpy="0.26 0 0"/>
+  </joint>
+
+  <link name="leg_fr">
+    <visual>
+      <geometry>
+        <cylinder radius="0.006" length="0.12"/>
+      </geometry>
+      <material name="carbon_fiber"/>
+    </visual>
+  </link>
+  <joint name="leg_fr_joint" type="fixed">
+    <parent link="arm_fr"/>
+    <child link="leg_fr"/>
+    <origin xyz="0.10 0 -0.07" rpy="0.26 0 0"/>
+  </joint>
+
+  <link name="leg_rl">
+    <visual>
+      <geometry>
+        <cylinder radius="0.006" length="0.12"/>
+      </geometry>
+      <material name="carbon_fiber"/>
+    </visual>
+  </link>
+  <joint name="leg_rl_joint" type="fixed">
+    <parent link="arm_rl"/>
+    <child link="leg_rl"/>
+    <origin xyz="0.10 0 -0.07" rpy="0.26 0 0"/>
+  </joint>
+
+  <link name="leg_rr">
+    <visual>
+      <geometry>
+        <cylinder radius="0.006" length="0.12"/>
+      </geometry>
+      <material name="carbon_fiber"/>
+    </visual>
+  </link>
+  <joint name="leg_rr_joint" type="fixed">
+    <parent link="arm_rr"/>
+    <child link="leg_rr"/>
+    <origin xyz="0.10 0 -0.07" rpy="0.26 0 0"/>
+  </joint>
+
+</robot>
