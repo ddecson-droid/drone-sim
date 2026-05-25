@@ -1,56 +1,112 @@
 # =============================================================================
-# ros_gz_bridge topic mapping configuration
-# Bridges Gazebo Harmonic (gz-transport) topics to ROS 2 topics.
+# ros_gz_bridge 话题桥接配置
+# =============================================================================
+# 将 Gazebo Harmonic (gz-transport) 话题映射为 ROS 2 话题。
 #
-# Run "gz topic -l" to discover available Gazebo topics at runtime.
-# Topic names vary based on world name and model instance suffix (e.g., x500_0).
+# ============================================================
+# 话题名格式说明
+# ============================================================
+# Gazebo Transport 话题命名规则:
+#   /world/<world_name>/model/<model_name>/link/<link_name>/sensor/<sensor_name>/<data>
 #
-# The launch script substitutes ${WORLD} and ${INSTANCE} at runtime.
+# 示例:
+#   /world/default/model/x500_0/link/camera_link/sensor/camera_sensor/image
+#   |       |      |     |     |          |      |              |
+#   |       |      |     |     |          |      |              └─ 数据字段
+#   |       |      |     |     |          |      └──────────────── 传感器名
+#   |       |      |     |     |          └─────────────────────── 连杆名
+#   |       |      |     |     └────────────────────────────────── 模型名+实例号
+#   |       |      |     └──────────────────────────────────────── 实例后缀 (_0)
+#   |       |      └────────────────────────────────────────────── 模型名 (x500)
+#   |       └───────────────────────────────────────────────────── 世界名 (default)
+#   └───────────────────────────────────────────────────────────── 根命名空间
+#
+# ============================================================
+# direction 说明
+# ============================================================
+# GZ_TO_ROS: Gazebo 发布 → ROS 2 接收 (传感器数据)
+# ROS_TO_GZ: ROS 2 发布 → Gazebo 接收 (控制指令)
+#
+# ============================================================
+# 运行时查看 Gazebo 话题
+# ============================================================
+#   gz topic -l              # 列出所有 Gazebo Transport 话题
+#   gz topic -i <topic>      # 查看话题详细信息
 # =============================================================================
 
-# --- Clock synchronization (REQUIRED for use_sim_time) ---
+# ============================================================
+# ★ 仿真时钟同步 (必须)
+# ============================================================
+# PX4 和 Gazebo 都在仿真时间内运行
+# ROS 2 节点通过 use_sim_time:=true 使用此 /clock
+# 不桥接 /clock 会导致 TF 时间戳错乱, RViz2 不显示模型
 - ros_topic_name: "/clock"
   gz_topic_name: "/clock"
   ros_type_name: "rosgraph_msgs/msg/Clock"
   gz_type_name: "gz.msgs.Clock"
   direction: GZ_TO_ROS
 
-# --- Camera RGB image (for x500_mono_cam / x500_depth variants) ---
+# ============================================================
+# RGB 相机图像 (需要 x500_mono_cam 或 x500_depth 模型)
+# ============================================================
+# 图像格式: 默认 RGBA, 可通过 gz 插件配置修改
+# 对应 ROS 话题可在 RViz2 的 Image 插件中查看
 - ros_topic_name: "/camera/image_raw"
   gz_topic_name: "/world/default/model/x500_0/link/camera_link/sensor/camera_sensor/image"
   ros_type_name: "sensor_msgs/msg/Image"
   gz_type_name: "gz.msgs.Image"
   direction: GZ_TO_ROS
 
-# --- Camera info ---
+# ============================================================
+# 相机内参 (焦距、主点、畸变系数等)
+# ============================================================
+# 计算机视觉算法需要此数据做图像矫正
+# 与 /camera/image_raw 配对使用
 - ros_topic_name: "/camera/camera_info"
   gz_topic_name: "/world/default/model/x500_0/link/camera_link/sensor/camera_sensor/camera_info"
   ros_type_name: "sensor_msgs/msg/CameraInfo"
   gz_type_name: "gz.msgs.CameraInfo"
   direction: GZ_TO_ROS
 
-# --- Lidar 2D scan (for x500_lidar_2d variant) ---
+# ============================================================
+# 2D 激光雷达扫描 (需要 x500_lidar_2d 模型)
+# ============================================================
+# 输出: 距离和角度数组
+# 可在 RViz2 的 LaserScan 插件中查看 (红色点/线)
 - ros_topic_name: "/scan"
   gz_topic_name: "/world/default/model/x500_0/link/lidar_sensor_link/sensor/lidar/scan"
   ros_type_name: "sensor_msgs/msg/LaserScan"
   gz_type_name: "gz.msgs.LaserScan"
   direction: GZ_TO_ROS
 
-# --- Lidar point cloud (for GPU lidar variants) ---
+# ============================================================
+# GPU 激光雷达点云 (需要 GPU 激光雷达模型)
+# ============================================================
+# 输出: 3D 点云 (比 2D 激光雷达更密的点)
+# 可在 RViz2 的 PointCloud2 插件中查看 (彩色点)
 - ros_topic_name: "/lidar/points"
   gz_topic_name: "/world/default/model/x500_0/link/lidar_link/sensor/gpu_lidar/scan/points"
   ros_type_name: "sensor_msgs/msg/PointCloud2"
   gz_type_name: "gz.msgs.PointCloudPacked"
   direction: GZ_TO_ROS
 
-# --- Model pose (optional, for Gazebo-ground-truth TF) ---
+# ============================================================
+# 模型真值位姿 (调试用, 可选)
+# ============================================================
+# 来自 Gazebo 物理引擎的真实位姿 (无噪声)
+# 对比 /fmu/out/vehicle_odometry 可评估 EKF 估计误差
+# 默认注释掉, 如需启用取消注释即可
 - ros_topic_name: "/gz/pose"
   gz_topic_name: "/world/default/model/x500_0/pose"
   ros_type_name: "geometry_msgs/msg/PoseStamped"
   gz_type_name: "gz.msgs.Pose"
   direction: GZ_TO_ROS
 
-# --- Actuator outputs (for debugging motor commands) ---
+# ============================================================
+# 执行器输出 (调试电机指令用)
+# ============================================================
+# 注意: 此桥接可能因类型不匹配而失败 (gz.msgs.Actuators → JointState)
+# 如不需要调试可注释掉
 - ros_topic_name: "/actuator_outputs"
   gz_topic_name: "/world/default/model/x500_0/actuator_outputs"
   ros_type_name: "sensor_msgs/msg/JointState"
